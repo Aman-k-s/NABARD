@@ -36,3 +36,35 @@
     transform: rotate(360deg);
   }
 }
+
+/* Search bar positioning */
+.leaflet-control-geosearch {
+  margin-top: 70px;
+  margin-left: 10px;
+  max-width: 260px;
+  z-index: 1000;
+}
+
+/* Zoom button positioning */
+.leaflet-control-zoom {
+  bottom: 20px;
+  right: 20px;
+  top: auto !important;
+  left: auto !important;
+}
+
+.leaflet-control-geosearch {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important; /* move search to top-right */
+  z-index: 1000;
+}
+
+
+
+/* Move zoom control to the right side */
+.leaflet-control-zoom {
+  right: 10px !important;
+  left: 10px !important;
+  top: 20px !important; /* push down a bit below search */
+}
