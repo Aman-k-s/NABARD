@@ -5,6 +5,10 @@
 /.pnp
 .pnp.js
 
+# django backend
+**/venv/
+mrv-backend/db.sqlite3
+
 # testing
 /coverage
 

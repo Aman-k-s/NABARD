@@ -568,7 +568,7 @@ function FarmMap() {
         </div>
       )}
 
-      {/* Field Data Display */}
+      {/* Field Data Display - FIXED VERSION */}
       {fieldData && (
         <div
           style={{
@@ -580,11 +580,16 @@ function FarmMap() {
         >
           <h3 style={{ color: "#2e7d32", marginBottom: "15px" }}>Field Analysis Results</h3>
           
-          {/* Vegetation Indices */}
+          {/* Vegetation Indices - FIXED */}
           <div style={{ marginBottom: "20px" }}>
             <h4 style={{ color: "#1976d2" }}>Vegetation Indices</h4>
             <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-              {Object.entries(fieldData.vegetation_indices).map(([key, value]) => (
+              {/* Create vegetation indices object from individual fields */}
+              {[
+                { key: 'NDVI', value: fieldData.NDVI },
+                { key: 'EVI', value: fieldData.EVI },
+                { key: 'SAVI', value: fieldData.SAVI }
+              ].map(({ key, value }) => (
                 <div
                   key={key}
                   style={{
@@ -594,56 +599,68 @@ function FarmMap() {
                     minWidth: "100px",
                   }}
                 >
-                  <strong>{key}:</strong> {value.toFixed(2)}
+                  <strong>{key}:</strong> {value ? value.toFixed(3) : 'N/A'}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Other Metrics */}
+          {/* Other Metrics - FIXED */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px", marginBottom: "20px" }}>
             <div style={{ padding: "15px", backgroundColor: "#e8f5e9", borderRadius: "8px" }}>
               <h4>Crop Type</h4>
-              <p>Class: {fieldData.crop_type_class}</p>
+              <p>Class: {fieldData.crop_type_class ? Math.round(fieldData.crop_type_class) : 'N/A'}</p>
             </div>
             
             <div style={{ padding: "15px", backgroundColor: "#e3f2fd", borderRadius: "8px" }}>
               <h4>Rainfall</h4>
-              <p>{fieldData.rainfall_mm.precipitation} mm</p>
+              <p>{fieldData.rainfall_mm ? fieldData.rainfall_mm.toFixed(2) : 'N/A'} mm</p>
             </div>
             
             <div style={{ padding: "15px", backgroundColor: "#fff3e0", borderRadius: "8px" }}>
               <h4>Temperature</h4>
-              <p>{(fieldData.temperature_K.LST_Day_1km - 273.15).toFixed(1)}°C</p>
+              <p>
+                {fieldData.temperature_K 
+                  ? (fieldData.temperature_K - 273.15).toFixed(1) 
+                  : 'N/A'}°C
+              </p>
             </div>
             
             <div style={{ padding: "15px", backgroundColor: "#f3e5f5", borderRadius: "8px" }}>
               <h4>Soil Moisture</h4>
-              <p>{(fieldData.soil_moisture.volumetric_soil_water_layer_1 * 100).toFixed(1)}%</p>
+              <p>
+                {fieldData.soil_moisture 
+                  ? (fieldData.soil_moisture * 100).toFixed(1) 
+                  : 'N/A'}%
+              </p>
             </div>
           </div>
 
-          {/* NDVI Time Series */}
+          {/* NDVI Time Series - FIXED */}
           <div>
             <h4 style={{ color: "#1976d2", marginBottom: "10px" }}>NDVI Time Series</h4>
-            <div style={{ maxHeight: "200px", overflowY: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ backgroundColor: "#f5f5f5" }}>
-                    <th style={{ padding: "8px", textAlign: "left" }}>Date</th>
-                    <th style={{ padding: "8px", textAlign: "left" }}>NDVI</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {fieldData.ndvi_time_series.map((entry, index) => (
-                    <tr key={index} style={{ borderBottom: "1px solid #eee" }}>
-                      <td style={{ padding: "8px" }}>{entry.date}</td>
-                      <td style={{ padding: "8px" }}>{entry.NDVI.toFixed(2)}</td>
+            {fieldData.ndvi_time_series && fieldData.ndvi_time_series.length > 0 ? (
+              <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr style={{ backgroundColor: "#f5f5f5" }}>
+                      <th style={{ padding: "8px", textAlign: "left" }}>Date</th>
+                      <th style={{ padding: "8px", textAlign: "left" }}>NDVI</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {fieldData.ndvi_time_series.map((entry, index) => (
+                      <tr key={index} style={{ borderBottom: "1px solid #eee" }}>
+                        <td style={{ padding: "8px" }}>{entry.date}</td>
+                        <td style={{ padding: "8px" }}>{entry.NDVI.toFixed(3)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p>No time series data available</p>
+            )}
           </div>
         </div>
       )}
