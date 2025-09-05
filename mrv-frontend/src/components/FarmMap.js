@@ -154,20 +154,41 @@ function FarmMap() {
     setFarmArea(2.5);
   };
 
-  const saveFarm = () => {
+  const [fieldData, setFieldData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const saveFarm = async () => {
     if (farmPolygon.length >= 3) {
-      const farmData = {
-        coordinates: farmPolygon,
-        area: farmArea,
-        timestamp: new Date().toISOString(),
-      };
+      setIsLoading(true);
+      try {
+        // Convert coordinates to the required format [[lat, lon], ...]
+        const coordinates = [farmPolygon.map(point => [point[1], point[0]])];
+        
+        const response = await fetch('http://localhost:8000/api/field-data/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            coordinates: coordinates
+          }),
+        });
 
-      console.log("Farm data to send to backend:", farmData);
-      alert(
-        `Farm boundary saved! Area: ${farmArea} hectares / खेत की सीमा सेव हो गई! क्षेत्रफल: ${farmArea} हेक्टेयर`
-      );
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
 
-      // Here you'll later send to Rakshit's backend
+        const data = await response.json();
+        setFieldData(data);
+        alert(
+          `Farm boundary saved! Area: ${farmArea} hectares / खेत की सीमा सेव हो गई! क्षेत्रफल: ${farmArea} हेक्टेयर`
+        );
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error saving farm data. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       alert("Please draw a farm boundary first! / पहले खेत की सीमा बनाएं!");
     }
@@ -522,21 +543,108 @@ function FarmMap() {
         >
           <button
             onClick={saveFarm}
+            disabled={isLoading}
             style={{
               fontSize: "20px",
               padding: "15px 40px",
-              backgroundColor: "#4caf50",
+              backgroundColor: isLoading ? "#ccc" : "#4caf50",
               color: "white",
               border: "none",
               borderRadius: "10px",
-              cursor: "pointer",
+              cursor: isLoading ? "not-allowed" : "pointer",
               boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
             }}
           >
-            💾 Save Farm Boundary
-            <br />
-            खेत की सीमा सेव करें
+            {isLoading ? (
+              "Loading..."
+            ) : (
+              <>
+                💾 Save Farm Boundary
+                <br />
+                खेत की सीमा सेव करें
+              </>
+            )}
           </button>
+        </div>
+      )}
+
+      {/* Field Data Display */}
+      {fieldData && (
+        <div
+          style={{
+            backgroundColor: "white",
+            padding: "20px",
+            borderRadius: "10px",
+            marginTop: "20px",
+          }}
+        >
+          <h3 style={{ color: "#2e7d32", marginBottom: "15px" }}>Field Analysis Results</h3>
+          
+          {/* Vegetation Indices */}
+          <div style={{ marginBottom: "20px" }}>
+            <h4 style={{ color: "#1976d2" }}>Vegetation Indices</h4>
+            <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+              {Object.entries(fieldData.vegetation_indices).map(([key, value]) => (
+                <div
+                  key={key}
+                  style={{
+                    padding: "10px",
+                    backgroundColor: "#f5f5f5",
+                    borderRadius: "5px",
+                    minWidth: "100px",
+                  }}
+                >
+                  <strong>{key}:</strong> {value.toFixed(2)}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Other Metrics */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px", marginBottom: "20px" }}>
+            <div style={{ padding: "15px", backgroundColor: "#e8f5e9", borderRadius: "8px" }}>
+              <h4>Crop Type</h4>
+              <p>Class: {fieldData.crop_type_class}</p>
+            </div>
+            
+            <div style={{ padding: "15px", backgroundColor: "#e3f2fd", borderRadius: "8px" }}>
+              <h4>Rainfall</h4>
+              <p>{fieldData.rainfall_mm.precipitation} mm</p>
+            </div>
+            
+            <div style={{ padding: "15px", backgroundColor: "#fff3e0", borderRadius: "8px" }}>
+              <h4>Temperature</h4>
+              <p>{(fieldData.temperature_K.LST_Day_1km - 273.15).toFixed(1)}°C</p>
+            </div>
+            
+            <div style={{ padding: "15px", backgroundColor: "#f3e5f5", borderRadius: "8px" }}>
+              <h4>Soil Moisture</h4>
+              <p>{(fieldData.soil_moisture.volumetric_soil_water_layer_1 * 100).toFixed(1)}%</p>
+            </div>
+          </div>
+
+          {/* NDVI Time Series */}
+          <div>
+            <h4 style={{ color: "#1976d2", marginBottom: "10px" }}>NDVI Time Series</h4>
+            <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ backgroundColor: "#f5f5f5" }}>
+                    <th style={{ padding: "8px", textAlign: "left" }}>Date</th>
+                    <th style={{ padding: "8px", textAlign: "left" }}>NDVI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fieldData.ndvi_time_series.map((entry, index) => (
+                    <tr key={index} style={{ borderBottom: "1px solid #eee" }}>
+                      <td style={{ padding: "8px" }}>{entry.date}</td>
+                      <td style={{ padding: "8px" }}>{entry.NDVI.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
 
