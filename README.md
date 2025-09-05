@@ -12,7 +12,7 @@ RiceLens MRV transforms carbon credit verification for smallholder rice farmers 
 
 ## Key Features
 
-- **Satellite-Based Monitoring**: Automated AWD detection using Sentinel-2 imagery via Google Earth Engine with 5-7 day revisit frequency
+- **Satellite-Based Monitoring**: Automated AWD detection using Sentinel-2 imagery via Google Earth Engine
 - **Transparent Reporting**: Real-time dashboard showing all satellite analytics, empowering farmers as active partners
 - **Carbon Credit Generation**: Automated VM0051-compliant evidence bundles for registry submission
 - **Anti-Fraud Architecture**: Satellite-primary verification eliminates data manipulation incentives
