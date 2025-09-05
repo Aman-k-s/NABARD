@@ -9,28 +9,16 @@ class FieldDataRequestSerializer(serializers.Serializer):
         )
     )
 
-class VegetationIndicesSerializer(serializers.Serializer):
-    NDVI = serializers.FloatField()
-    EVI = serializers.FloatField()
-    SAVI = serializers.FloatField()
-
-class RainfallSerializer(serializers.Serializer):
-    precipitation = serializers.FloatField()
-
-class TemperatureSerializer(serializers.Serializer):
-    LST_Day_1km = serializers.FloatField()
-
-class SoilMoistureSerializer(serializers.Serializer):
-    volumetric_soil_water_layer_1 = serializers.FloatField()
-
-class NDVITimeSeriesEntrySerializer(serializers.Serializer):
-    date = serializers.DateField()
-    NDVI = serializers.FloatField()
-
 class FieldDataResponseSerializer(serializers.Serializer):
-    vegetation_indices = VegetationIndicesSerializer()
-    crop_type_class = serializers.IntegerField()
-    rainfall_mm = RainfallSerializer()
-    temperature_K = TemperatureSerializer()
-    soil_moisture = SoilMoistureSerializer()
-    ndvi_time_series = NDVITimeSeriesEntrySerializer(many=True)
+    NDVI = serializers.FloatField(allow_null=True)
+    EVI = serializers.FloatField(allow_null=True)
+    SAVI = serializers.FloatField(allow_null=True)
+    crop_type_class = serializers.FloatField(allow_null=True)
+    rainfall_mm = serializers.FloatField(allow_null=True)
+    temperature_K = serializers.FloatField(allow_null=True)
+    soil_moisture = serializers.FloatField(allow_null=True)
+    ndvi_time_series = serializers.ListField(
+        child=serializers.DictField(), 
+        allow_empty=True,  # Allow empty list
+        required=False     # Make it optional
+    )
